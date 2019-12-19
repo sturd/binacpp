@@ -1,4 +1,5 @@
 .vscode
+venv/
 cmake/
 conan.lock
 conanbuildinfo*
