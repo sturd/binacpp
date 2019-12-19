@@ -20,6 +20,10 @@ class BinacppConan(ConanFile):
         git.clone("https://github.com/sturd/binacpp.git")
         git.checkout("cmake")
 
+    def configure(self):
+        if(self.settings.os == "Linux"):
+            self.options["jsoncpp"].shared = True
+
     def build(self):
         cmake = CMake(self)
         cmake.verbose = True
