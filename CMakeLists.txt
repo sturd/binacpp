@@ -25,7 +25,7 @@ set(
     src/binacpp.h
 )
 
-add_library(binacpp SHARED ${BINACPP_SOURCES} ${BINACPP_HEADERS})
+add_library(binacpp STATIC ${BINACPP_SOURCES} ${BINACPP_HEADERS})
 target_link_libraries(
     binacpp
     jsoncpp
