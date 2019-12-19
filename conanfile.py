@@ -18,7 +18,7 @@ class BinacppConan(ConanFile):
     def source(self):
         git = tools.Git()
         git.clone("https://github.com/sturd/binacpp.git")
-        git.checkout("binacpp_use_conan_cmake")
+        git.checkout("sturd_downstream_changes")
 
     def configure(self):
         if(self.settings.os == "Linux"):
