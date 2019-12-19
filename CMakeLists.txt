@@ -5,6 +5,10 @@ project(binacpp)
 include(conanbuildinfo.cmake)
 conan_basic_setup()
 
+if(UNIX)
+    add_compile_options(-fPIC)
+endif()
+
 set(
     BINACPP_SOURCES
     src/binacpp_utils.cpp
@@ -25,6 +29,6 @@ add_library(binacpp SHARED ${BINACPP_SOURCES} ${BINACPP_HEADERS})
 target_link_libraries(
     binacpp
     jsoncpp
-    libcurl
-    websockets_static
+    $<$<PLATFORM_ID:Windows>:libcurl>
+    websockets$<$<PLATFORM_ID:Windows>:_static>
 )
