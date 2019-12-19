@@ -10,6 +10,7 @@
 #ifndef BINACPP_H
 #define BINACPP_H
 
+#include "binacpp_export.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -33,7 +34,7 @@
 
 using namespace std;
 
-class BinaCPP {
+class BINACPP_EXPORT BinaCPP {
 
 	static string api_key;
 	static string secret_key;
