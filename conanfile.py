@@ -10,7 +10,7 @@ class BinacppConan(ConanFile):
     author = "https://github.com/tensaix2j"
     generators = "cmake"
     requires = [
-        "jsoncpp/1.8.4@theirix/stable",
+        "jsoncpp/1.9.2",
         "libcurl/7.56.1@bincrafters/stable",
         "libwebsockets/2.4.0@bincrafters/stable"
     ]
@@ -22,6 +22,7 @@ class BinacppConan(ConanFile):
 
     def configure(self):
         if(self.settings.os == "Linux"):
+            self.options["jsoncpp"].fPIC = True
             self.options["jsoncpp"].shared = True
             self.options["OpenSSL"].shared = True
             self.options["libcurl"].shared = True
