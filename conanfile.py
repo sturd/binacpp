@@ -33,8 +33,8 @@ class BinacppConan(ConanFile):
 
     def package(self):
         self.copy("*.h", src="src", dst="include")
-        self.copy("*.so*", src="cmake/lib", dst="lib")
-        self.copy("*.a", src="cmake/lib", dst="lib")
+        self.copy("*.so*", src="cmake", dst="lib")
+        self.copy("*.a", src="cmake", dst="lib")
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
