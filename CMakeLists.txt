@@ -4,6 +4,9 @@ project(binacpp)
 
 include(conanbuildinfo.cmake)
 
+set(OPENSSL_ROOT_DIR ${CONAN_OPENSSL_ROOT})
+find_package(OpenSSL REQUIRED)
+
 set(CURL_LIBRARY ${CONAN_LIBCURL_ROOT})
 find_package(CURL REQUIRED)
 
@@ -36,6 +39,6 @@ target_link_libraries(
     CURL::libcurl
     dl
     z
-    ssl
-    crypto
+    OpenSSL::SSL
+    OpenSSL::Crypto
 )
