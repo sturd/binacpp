@@ -31,4 +31,9 @@ target_link_libraries(
     jsoncpp
     $<$<PLATFORM_ID:Windows>:libcurl>
     websockets$<$<PLATFORM_ID:Windows>:_static>
+    curl
+    dl
+    z
+    ssl
+    crypto
 )
