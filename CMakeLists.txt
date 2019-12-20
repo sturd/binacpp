@@ -3,7 +3,9 @@ cmake_minimum_required(VERSION 3.1)
 project(binacpp)
 
 include(conanbuildinfo.cmake)
-conan_basic_setup()
+
+set(CURL_LIBRARY ${CONAN_LIBCURL_ROOT})
+find_package(CURL REQUIRED)
 
 if(UNIX)
     add_compile_options(-fPIC)
@@ -31,7 +33,7 @@ target_link_libraries(
     jsoncpp
     $<$<PLATFORM_ID:Windows>:libcurl>
     websockets$<$<PLATFORM_ID:Windows>:_static>
-    curl
+    CURL::libcurl
     dl
     z
     ssl
