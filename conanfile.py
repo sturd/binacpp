@@ -23,6 +23,8 @@ class BinacppConan(ConanFile):
     def configure(self):
         if(self.settings.os == "Linux"):
             self.options["jsoncpp"].shared = True
+            self.options["OpenSSL"].shared = True
+            self.options["libcurl"].shared = True
 
     def build(self):
         cmake = CMake(self)
