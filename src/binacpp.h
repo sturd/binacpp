@@ -31,14 +31,13 @@
 
 #define BINANCE_HOST "https://api.binance.com"
 
+using namespace std;
 
 struct BinaCPPCurl {
 	CURL* curl;
-	std::mutex mutex;
+	mutex mutex;
 	bool wait_next;
 };
-
-using namespace std;
 
 class BinaCPP {
 
