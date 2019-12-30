@@ -1876,15 +1876,15 @@ BinaCPP::curl_api_with_header( string &url, string &str_result, vector <string> 
 
 	CURLcode res;
 
-	BinaCPPCurl *curl_data = get_available_curl();
+	auto curl_obj = get_available_curl();
 
-	if( curl_data->curl ) {
+	if( curl_obj->curl ) {
 
-		curl_easy_setopt(curl_data->curl, CURLOPT_URL, url.c_str() );
-		curl_easy_setopt(curl_data->curl, CURLOPT_WRITEFUNCTION, BinaCPP::curl_cb);
-		curl_easy_setopt(curl_data->curl, CURLOPT_WRITEDATA, &str_result );
-		curl_easy_setopt(curl_data->curl, CURLOPT_SSL_VERIFYPEER, false);
-		curl_easy_setopt(curl_data->curl, CURLOPT_ENCODING, "gzip");
+		curl_easy_setopt(curl_obj->curl, CURLOPT_URL, url.c_str() );
+		curl_easy_setopt(curl_obj->curl, CURLOPT_WRITEFUNCTION, BinaCPP::curl_cb);
+		curl_easy_setopt(curl_obj->curl, CURLOPT_WRITEDATA, &str_result );
+		curl_easy_setopt(curl_obj->curl, CURLOPT_SSL_VERIFYPEER, false);
+		curl_easy_setopt(curl_obj->curl, CURLOPT_ENCODING, "gzip");
 
 		if ( extra_http_header.size() > 0 ) {
 			
@@ -1892,18 +1892,18 @@ BinaCPP::curl_api_with_header( string &url, string &str_result, vector <string> 
 			for ( int i = 0 ; i < extra_http_header.size() ;i++ ) {
 				chunk = curl_slist_append(chunk, extra_http_header[i].c_str() );
 			}
-			curl_easy_setopt(curl_data->curl, CURLOPT_HTTPHEADER, chunk);
+			curl_easy_setopt(curl_obj->curl, CURLOPT_HTTPHEADER, chunk);
 		}
 
 		if ( post_data.size() > 0 || action == "POST" || action == "PUT" || action == "DELETE" ) {
 
 			if ( action == "PUT" || action == "DELETE" ) {
-				curl_easy_setopt(curl_data->curl, CURLOPT_CUSTOMREQUEST, action.c_str() );
+				curl_easy_setopt(curl_obj->curl, CURLOPT_CUSTOMREQUEST, action.c_str() );
 			}
-			curl_easy_setopt(curl_data->curl, CURLOPT_POSTFIELDS, post_data.c_str() );
+			curl_easy_setopt(curl_obj->curl, CURLOPT_POSTFIELDS, post_data.c_str() );
  		}
 
-		res = curl_easy_perform(curl_data->curl);
+		res = curl_easy_perform(curl_obj->curl);
 
 		/* Check for errors */ 
 		if ( res != CURLE_OK ) {
@@ -1911,29 +1911,29 @@ BinaCPP::curl_api_with_header( string &url, string &str_result, vector <string> 
 		} 	
 
 	}
-	curl_data->mutex.unlock();
+	
+	curl_data_mutex.lock();
+	curl_data.push_back(std::move(curl_obj));
+	curl_data_mutex.unlock();
 	BinaCPP_logger::write_log( "<BinaCPP::curl_api> done" ) ;
 
 }
 
-BinaCPPCurl *BinaCPP::get_available_curl()
+std::shared_ptr<BinaCPPCurl> BinaCPP::get_available_curl()
 {
-	if(curl_data.size() == 1) {
-		curl_data[0].mutex.lock();
-		return &curl_data[0];
-	} else {
-		for(auto &curl : curl_data) {
-			if(curl.mutex.try_lock())
-				return &curl;
-		}
+	curl_data_mutex.lock();
 
-		curl_data_mutex.lock();
-		BinaCPPCurl curl_init;
-		curl_init.curl = curl_easy_init();
-		curl_init.mutex.lock();
-		curl_data.push_back(curl_init);
+	if(curl_data.size() == 0) {
+		auto curl_obj = std::make_shared<BinaCPPCurl>();
+		curl_obj->curl = curl_easy_init();
+
 		curl_data_mutex.unlock();
-		return &curl_data[curl_data.size()-1];
+		return std::move(curl_obj);
+	} else {
+		auto curl_obj = curl_data.front();
+		curl_data.pop_front();
+		curl_data_mutex.unlock();
+		return std::move(curl_obj);
 	}
 }
 
