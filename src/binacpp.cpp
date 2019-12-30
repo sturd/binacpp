@@ -38,7 +38,7 @@ void
 BinaCPP::cleanup()
 {
 	for(auto &curl_shutdown : curl_data)
-		curl_easy_cleanup(curl_shutdown.curl);
+		curl_easy_cleanup(curl_shutdown->curl);
 
 	curl_global_cleanup();
 }
