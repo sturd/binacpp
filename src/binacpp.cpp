@@ -26,18 +26,9 @@ string BinaCPP::secret_key = "";
 
 //---------------------------------
 void 
-BinaCPP::init( string &api_key, string &secret_key, int num_threads ) 
+BinaCPP::init( string &api_key, string &secret_key ) 
 {
 	curl_global_init(CURL_GLOBAL_DEFAULT);
-
-	curl_wait_next = 0;
-	for(int i = 0; i < num_threads; ++i)
-	{
-		BinaCPPCurl curl_init;
-		curl_init.curl = curl_easy_init();
-		curl_data.push_back(curl_init);
-	}
-
 	BinaCPP::api_key = api_key;
 	BinaCPP::secret_key = secret_key;
 }
@@ -1867,12 +1858,13 @@ BinaCPPCurl *BinaCPP::get_available_curl()
 				return &curl;
 		}
 
-		uint curl_wait = curl_wait_next;
-		++curl_wait_next;
-		if(curl_wait_next == curl_data.size())
-			curl_wait_next = 0;
-		curl_data[curl_wait].mutex.lock();
-		return &curl_data[curl_wait];
+		curl_data_mutex.lock();
+		BinaCPPCurl curl_init;
+		curl_init.curl = curl_easy_init();
+		curl_init.mutex.lock();
+		curl_data.push_back(curl_init);
+		curl_data_mutex.unlock();
+		return &curl_data[curl_data.size()-1];
 	}
 }
 
