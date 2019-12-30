@@ -21,6 +21,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <deque>
 #include <exception>
 #include <mutex>
 
@@ -35,8 +36,6 @@ using namespace std;
 
 struct BinaCPPCurl {
 	CURL* curl;
-	mutex mutex;
-	bool wait_next;
 };
 
 class BinaCPP {
@@ -45,9 +44,9 @@ class BinaCPP {
 	static string secret_key;
 
 	static mutex curl_data_mutex;
-	static vector<BinaCPPCurl> curl_data;
+	static deque<shared_ptr<BinaCPPCurl>> curl_data;
 
-	static BinaCPPCurl *get_available_curl();
+	static std::shared_ptr<BinaCPPCurl> get_available_curl();
 
 	public:
 
