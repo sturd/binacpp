@@ -20,17 +20,24 @@
 
 string BinaCPP::api_key = "";
 string BinaCPP::secret_key = "";
-CURL* BinaCPP::curl = NULL;
 
 
 
 
 //---------------------------------
 void 
-BinaCPP::init( string &api_key, string &secret_key ) 
+BinaCPP::init( string &api_key, string &secret_key, int num_threads ) 
 {
 	curl_global_init(CURL_GLOBAL_DEFAULT);
-	BinaCPP::curl = curl_easy_init();
+
+	curl_wait_next = 0;
+	for(int i = 0; i < num_threads; ++i)
+	{
+		BinaCPPCurl curl_init;
+		curl_init.curl = curl_easy_init();
+		curl_data.push_back(curl_init);
+	}
+
 	BinaCPP::api_key = api_key;
 	BinaCPP::secret_key = secret_key;
 }
@@ -39,7 +46,9 @@ BinaCPP::init( string &api_key, string &secret_key )
 void
 BinaCPP::cleanup()
 {
-	curl_easy_cleanup(BinaCPP::curl);
+	for(auto &curl_shutdown : curl_data)
+		curl_easy_cleanup(curl_shutdown.curl);
+
 	curl_global_cleanup();
 }
 
@@ -1702,7 +1711,7 @@ BinaCPP::get_depositAddress(
 
 	if ( api_key.size() == 0 || secret_key.size() == 0 ) {
 		BinaCPP_logger::write_log( "<BinaCPP::get_depositAddress> API Key and Secret Key has not been set." ) ;
-		return ;
+		return;
 	}
 
 	string url(BINANCE_HOST);
@@ -1845,5 +1854,23 @@ BinaCPP::curl_api_with_header( string &url, string &str_result, vector <string> 
 
 }
 
+BinaCPPCurl *BinaCPP::get_available_curl()
+{
+	if(curl_data.size() == 1) {
+		curl_data[0].mutex.lock();
+		return &curl_data[0];
+	} else {
+		for(auto &curl : curl_data) {
+			if(curl.mutex.try_lock())
+				return &curl;
+		}
 
+		uint curl_wait = curl_wait_next;
+		++curl_wait_next;
+		if(curl_wait_next == curl_data.size())
+			curl_wait_next = 0;
+		curl_data[curl_wait].mutex.lock();
+		return &curl_data[curl_wait];
+	}
+}
 
