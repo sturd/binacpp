@@ -17,7 +17,8 @@
 
 
 
-
+mutex BinaCPP::curl_data_mutex;
+deque<shared_ptr<BinaCPPCurl>> BinaCPP::curl_data;
 string BinaCPP::api_key = "";
 string BinaCPP::secret_key = "";
 
